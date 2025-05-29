@@ -1,16 +1,18 @@
 import alibabacloud_oss_v2 as oss
 import yaml
+from datetime import datetime
+import cv2
 
 
 def load_config():
-    with open("../../config.yaml","r") as f:
+    with open("../config.yaml", "r", encoding='utf-8') as f:
         config = yaml.safe_load(f)
         return config
 
 
 def upload(upload_data, file_name):
     oss_config = load_config()
-    oss_config=oss_config["oss"]
+    oss_config = oss_config["oss"]
 
     # 从环境变量中加载凭证信息，用于身份验证
     credentials_provider = oss.credentials.EnvironmentVariableCredentialsProvider()
@@ -28,9 +30,18 @@ def upload(upload_data, file_name):
     client = oss.Client(cfg)
 
     # 定义要上传的数据内容
-    data = upload_data
+    _, img_encoded = cv2.imencode('.jpg', upload_data)
+    data = img_encoded.tobytes()
 
-    object_key = f"{oss_config.get('prefix','')}{file_name}"
+    # 获取当前日期并格式化
+    now = datetime.now()
+    year = str(now.year)
+    month = f"{now.month:02d}"  # 补零，如 5 → "05"
+    day = f"{now.day:02d}"
+
+    object_key = f"{oss_config.get('key_prefix', '') + year + '/' + month + '/' + day + '/'}{file_name}"
+    print("开始上传文件")
+
     # 执行上传对象的请求，指定存储空间名称、对象名称和数据内容
     result = client.put_object(oss.PutObjectRequest(
         bucket=oss_config["bucket"],
@@ -51,10 +62,9 @@ def upload(upload_data, file_name):
         # 手动拼接文件访问 URL
         endpoint = oss_config["endpoint"]
         bucket = oss_config["bucket"]
-        file_url = f"https://{bucket}.{endpoint}/{object_key}"
-        print(f"File uploaded successfully. URL: {file_url}")
+        file_url = f"https://{bucket}.oss-{oss_config['region']}.aliyuncs.com{endpoint}/{object_key}"
+        print(f"文件上传成功. URL: {file_url}")
         return file_url  # 返回完整路径
     else:
         print(f"Upload failed. Status code: {result.status_code}")
         return None
-

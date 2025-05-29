@@ -42,6 +42,7 @@ def model_work(front_path, back_path):
     # 从OSS拿到图片
     front_image = download(front_path)
     back_image = download(back_path)
+    print("图片下载成功")
 
     # 导入训练好的模型
     model = YOLO('../model/ModelDetectionPCB.pt')
@@ -72,10 +73,10 @@ def service(json):
     push_data = {
         "serialNumber": serial_number,
         "content": save_data["content"],
-        "frontImage": save_data["frontImage"],
-        "backImage": save_data["backImage"],
+        "frontDefectImg": save_data["frontImage"],
+        "backDefectImg": save_data["backImage"],
         "defectLevel": save_data["defectLevel"],
-        "createAt": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        "createdAt": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     push_message(push_data)
 

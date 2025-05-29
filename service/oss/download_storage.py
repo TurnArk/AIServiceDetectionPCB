@@ -4,8 +4,16 @@ from PIL import Image
 from io import BytesIO
 
 
+def extract_key_from_url(url, bucket_name):
+    # 示例 URL: "https://detection-pcb-test.oss-cn-chengdu.aliyuncs.com/java_upload/2025/5/29/front_PCB_Board000012.jpg"
+    prefix = f"https://{bucket_name}.oss-cn-chengdu.aliyuncs.com/"
+    if url.startswith(prefix):
+        return url[len(prefix):]  # 返回 "java_upload/2025/5/29/front_PCB_Board000012.jpg"
+    else:
+        raise ValueError("Invalid OSS URL format")
+
 def load_config():
-    with open("../../config.yaml", "r") as f:
+    with open("../config.yaml", "r", encoding='utf-8') as f:
         config = yaml.safe_load(f)
         return config
 
@@ -14,6 +22,10 @@ def download(path):
     # 解析命令行参数
     oss_config = load_config()
     oss_config = oss_config["oss"]
+
+    # 从 URL 提取 key（去掉 Bucket 和 Endpoint 部分）
+    bucket_name = oss_config["bucket"]
+    key = extract_key_from_url(path, bucket_name)
 
     # 从环境变量中加载凭证信息，用于身份验证
     credentials_provider = oss.credentials.EnvironmentVariableCredentialsProvider()
@@ -34,8 +46,8 @@ def download(path):
 
     # 执行获取对象的请求，指定存储空间名称和对象名称
     result = client.get_object(oss.GetObjectRequest(
-        bucket=oss_config["bucket"],  # 指定存储空间名称
-        key=path,  # 获取对象名称,  # 指定对象键名
+        bucket=bucket_name,  # 指定存储空间名称
+        key=key,  # 获取对象名称,  # 指定对象键名
     ))
 
     # 输出获取对象的结果信息，用于检查请求是否成功

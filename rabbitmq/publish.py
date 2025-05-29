@@ -11,6 +11,7 @@ channel.queue_bind(exchange='ResultExchange', queue='ResultQueue', routing_key='
 
 
 def push_message(message):
+    print(message)
     channel.basic_publish(
         exchange='ResultExchange',
         routing_key='Result',

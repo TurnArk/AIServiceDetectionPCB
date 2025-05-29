@@ -2,16 +2,19 @@ from public.channel import get_channel,get_connection,close_rabbitmq
 from service.model_service import service
 import json
 
+print("已启动服务")
+
 connection = get_connection()
 channel = get_channel(connection)
 
-channel.declare_queue('RequestQueue', durable=True)
-channel.declare_exchange('RequestExchange', exchange_type='direct', durable=True)
+channel.queue_declare('RequestQueue', durable=True)
+channel.exchange_declare('RequestExchange', exchange_type='direct', durable=True)
 channel.queue_bind(exchange='RequestExchange', queue='RequestQueue', routing_key='Request')
 
 
 def callback(ch, method, properties, body):
     result = json.loads(body.decode('utf-8'))
+    print(f"启用回调，开始处理。\n{result}")
     service(result)
     ch.basic_ack(delivery_tag=method.delivery_tag)
 
