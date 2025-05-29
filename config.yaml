@@ -1,0 +1,5 @@
+oss:
+  region: "oss-cn-chengdu"          # 存储空间区域
+  bucket: "detection-pcb-test"      # Bucket 名称
+  endpoint: ""                      # 可选自定义 Endpoint
+  key_prefix: "uploads/"            # 对象名称前缀（可选）ion:
