@@ -3,7 +3,14 @@ import pika
 
 def get_connection():
     user = pika.PlainCredentials('ark', 'alice')
-    return pika.BlockingConnection(pika.ConnectionParameters('localhost', 5672, 'gundam', user))
+    return pika.BlockingConnection(pika.ConnectionParameters(
+        host='localhost',
+        port=5672,
+        virtual_host='gundam',
+        heartbeat=30,
+        blocked_connection_timeout=3000,
+        credentials=user
+    ))
 
 
 def get_channel(connect):

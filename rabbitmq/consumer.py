@@ -13,10 +13,14 @@ channel.queue_bind(exchange='RequestExchange', queue='RequestQueue', routing_key
 
 
 def callback(ch, method, properties, body):
-    result = json.loads(body.decode('utf-8'))
-    print(f"启用回调，开始处理。\n{result}")
-    service(result)
-    ch.basic_ack(delivery_tag=method.delivery_tag)
+    try:
+        result = json.loads(body.decode('utf-8'))
+        print(f"启用回调，开始处理。\n{result}")
+        service(result)
+        ch.basic_ack(delivery_tag=method.delivery_tag)
+    except  Exception as e:
+        print(f"处理失败：{e}")
+
 
 
 channel.basic_consume(
