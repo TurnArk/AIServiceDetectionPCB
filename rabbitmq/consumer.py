@@ -8,7 +8,7 @@ connection = get_connection()
 channel = get_channel(connection)
 
 channel.queue_declare('RequestQueue', durable=True)
-channel.exchange_declare('RequestExchange', exchange_type='direct', durable=True)
+channel.exchange_declare('RequestExchange', exchange_type='fanout', durable=True)
 channel.queue_bind(exchange='RequestExchange', queue='RequestQueue', routing_key='Request')
 
 
@@ -18,9 +18,8 @@ def callback(ch, method, properties, body):
         print(f"启用回调，开始处理。\n{result}")
         service(result)
         ch.basic_ack(delivery_tag=method.delivery_tag)
-    except  Exception as e:
+    except Exception as e:
         print(f"处理失败：{e}")
-
 
 
 channel.basic_consume(
